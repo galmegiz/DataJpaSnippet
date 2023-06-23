@@ -20,7 +20,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
 @Transactional
-@Rollback(value = false)
+//@Rollback(value = false)
 class MemberTest {
 
     @PersistenceContext
@@ -89,7 +89,7 @@ class MemberTest {
         memberJpaRepository.save(member2);
 
         List<Member> result = memberRepository.findNamedByUserName("member1");
-        assertThat(result.size()).isEqualTo(0);
+        assertThat(result.size()).isEqualTo(1);
 
     }
 

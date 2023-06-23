@@ -1,6 +1,8 @@
 package com.demoApp.repository;
 
 import com.demoApp.dto.MemberDto;
+import com.demoApp.dto.MemberProjection;
+import com.demoApp.dto.UserNameOnly;
 import com.demoApp.entity.Member;
 import jakarta.persistence.LockModeType;
 import jakarta.persistence.QueryHint;
@@ -71,4 +73,24 @@ public interface MemberRepository extends JpaRepository<Member, Long>, MemberRep
 
     @Lock(LockModeType.PESSIMISTIC_READ)
     List<Member> findLockByUserName(String userName);
+
+    //projection
+    List<UserNameOnly> findProjectionsByUserName(@Param("userName") String userName);
+
+    //dynamic projection
+    <T> List<T> findProjectionsByUserName(@Param("userName") String userName, Class<T> type);
+
+    //native query, 반환타입은 Object[], Tuple, DTO(스프링 데이터 인터페이스 Projections 지원)
+    //sort 파라미터를 통한 정렬이 정상 작동하지 않는다.
+    //JPQL처럼 애플리케이션 로딩 시점에 문법 확인 불가
+    //이걸 사용할 바에는 JdbcTemplate이나 myBatis사용
+    @Query(value = "select * from member where user_name = ?", nativeQuery = true)
+    Member findNativeQuery(String userName);
+
+    //정적 쿼리 + projection을 쓰는 경우 그나마 사용할 만 하다.
+    @Query(value = "select m.member_id as id, m.userName, t.name as teamName " +
+            "from member m left join team t",
+            countQuery = "select count(*) from member",
+            nativeQuery = true)
+    Page<MemberProjection> findByNativeProjection(Pageable pageable);
 }
